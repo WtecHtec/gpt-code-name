@@ -40,7 +40,7 @@ export function activate(context: vscode.ExtensionContext) {
     // }
     const what = await vscode.window.showInputBox({ placeHolder: '描述...' });
 
-    const gptKey = vscode.workspace.getConfiguration().get('codename.gptkey');
+    const gptKey = vscode.workspace.getConfiguration().get('codename.gptkey') as string;
     console.log('gptKey===', gptKey);
 
     if (what && gptKey) {
