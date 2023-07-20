@@ -1,6 +1,7 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
+import axios from 'axios';
 // import { Configuration, OpenAIApi } from "openai";
 
 // const configuration = new Configuration({
@@ -42,8 +43,9 @@ export function activate(context: vscode.ExtensionContext) {
     const gptKey = vscode.workspace.getConfiguration().get('codename.gptkey');
     console.log('gptKey===', gptKey);
 
-    if (what) {
-      console.log('what====', what);
+    if (what && gptKey) {
+      const res = await getCodeName(gptKey, what);
+      console.log('what====', what, res);
       // const chatCompletion = await openai.createChatCompletion({
       //   model: "gpt-3.5-turbo",
       //   messages: [{role: "user", content: "Hello world"}],
@@ -59,7 +61,7 @@ export function activate(context: vscode.ExtensionContext) {
         .then(function (msg) {
           console.log('msg===', msg);
           if (!msg) return;
-          const commentPos =  new vscode.Position(selection.start.line, 0);
+          const commentPos = new vscode.Position(selection.start.line, 0);
           const position = new vscode.Position(selection.start.line, selection.start.character);
           editor.edit((editBuilder) => {
             editBuilder.insert(commentPos, `// ${msg} \n`);
@@ -70,4 +72,32 @@ export function activate(context: vscode.ExtensionContext) {
   });
 
   context.subscriptions.push(disposable);
+}
+
+
+function getCodeName(key: string, desc: string) {
+  const data = JSON.stringify({
+    "model": "gpt-3.5-turbo",
+    "messages": [ {"role": "user", "content": `${desc}`} ] // messages就是你发的消息是数组形式
+  });
+  const config = {
+    method: 'post',
+    url: 'https://api.openai-proxy.com/v1/chat/completions',
+    headers: {
+      'Authorization': `Bearer ${key}`,
+      'Content-Type': 'application/json',
+    },
+    data: data
+  };
+  return new Promise(resolve => {
+    axios(config)
+    .then(function (response) {
+      console.log('response===', JSON.stringify(response.data));
+      resolve(response.data);
+    })
+    .catch(function (error) {
+      console.log('gpt error', error);
+      resolve(-1);
+    });
+  });
 }
