@@ -44,19 +44,23 @@ export function activate(context: vscode.ExtensionContext) {
     console.log('gptKey===', gptKey);
 
     if (what && gptKey) {
-      const res = await getCodeName(gptKey, what);
+      const res = await getCodeName(gptKey, what) as any;
       console.log('what====', what, res);
       // const chatCompletion = await openai.createChatCompletion({
       //   model: "gpt-3.5-turbo",
       //   messages: [{role: "user", content: "Hello world"}],
       // });
       // console.log(chatCompletion.data.choices[0].message);
+      if (res === -1 || res.length === 0) {
+        vscode.window.showInformationMessage(`错误请求！请查看key是否有效！${gptKey}`);
+        return;
+      }
       vscode.window.showQuickPick(
         [
-          what
+          ...res,
         ],
         {
-          placeHolder: '选择命名'
+          placeHolder: '选择变量名'
         })
         .then(function (msg) {
           console.log('msg===', msg);
@@ -64,7 +68,7 @@ export function activate(context: vscode.ExtensionContext) {
           const commentPos = new vscode.Position(selection.start.line, 0);
           const position = new vscode.Position(selection.start.line, selection.start.character);
           editor.edit((editBuilder) => {
-            editBuilder.insert(commentPos, `// ${msg} \n`);
+            editBuilder.insert(commentPos, `// ${what} \n`);
             editBuilder.insert(position, msg);
           });
         });
@@ -78,7 +82,13 @@ export function activate(context: vscode.ExtensionContext) {
 function getCodeName(key: string, desc: string) {
   const data = JSON.stringify({
     "model": "gpt-3.5-turbo",
-    "messages": [ {"role": "user", "content": `${desc}`} ] // messages就是你发的消息是数组形式
+    "messages": [ {
+      "role": "user", 
+      "content": `您好，
+      我希望你扮演丰富经验的程序设计专家，根据程序设计的中命名规则：匈牙利命名法、驼峰式命名法、帕斯卡命名法和下划线命名法，帮我设计变量名、函数名。
+      我将在要生成命名的描述内容之前添加/，你根据不用的情况生成相对应合理的命名。例如：”我输入/用户信息, 你会生成: userInfo、user_info、objMyData、UserInfo“。
+      要求：1.命名必须是英文;2.至少生成6个命名; 3.不要过多解释，只回复英文命名;4.命名必须按照标准程序设计的中命名规则;5.回复格式以‘,’隔开。
+      第一个命令是：/${desc}` }] // messages就是你发的消息是数组形式
   });
   const config = {
     method: 'post',
@@ -93,11 +103,36 @@ function getCodeName(key: string, desc: string) {
     axios(config)
     .then(function (response) {
       console.log('response===', JSON.stringify(response.data));
-      resolve(response.data);
+      const content = getMutliLevelProperty(response.data, 'choices.0.message.content', '');
+      console.log('content====', content);
+      if (content ) {
+        resolve(content.split(', ').filter((a: any) => a));
+      } else {
+        resolve(-1);
+      }
     })
     .catch(function (error) {
       console.log('gpt error', error);
       resolve(-1);
     });
   });
+}
+
+
+function getMutliLevelProperty(ctx: any, path: any, defaultVal: any) {
+  let res = defaultVal;
+  if (typeof path !== 'string' || Object.keys(ctx).length === 0) return res;
+  let key = path.replace(/\[(\w+)\]/g, '.$1');
+  key = key.replace(/^\./, '');
+  const arr = key.split('.');
+  for (let i = 0, count = arr.length; i < count; i++) {
+    const p = arr[i];
+    if ((Object.keys(ctx).length || Array.isArray(ctx)) && p in ctx) {
+      ctx = ctx[p];
+    } else {
+      return res;
+    }
+  }
+  res = ctx;
+  return res;
 }

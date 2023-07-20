@@ -19,11 +19,11 @@
     "commands": [
       {
         "command": "extension.codename",
-        "title": "CodeName"
+        "title": "CODERG"
       }
     ],
     "configuration": {
-      "title": "Code Name",
+      "title": "CODERG",
       "properties": {
         "codename.gptkey": {
           "type": "string",
