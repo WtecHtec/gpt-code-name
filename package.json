@@ -5,6 +5,7 @@
   "version": "0.0.2",
   "publisher": "sr7",
   "repository": "https://github.com/WtecHtec/gpt-code-name",
+  "icon": "/images/icon.png",
   "engines": {
     "vscode": "^1.34.0"
   },
