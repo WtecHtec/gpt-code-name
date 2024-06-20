@@ -3,7 +3,8 @@ According to the description, generate variable names and function names accordi
 
 # 设置 gpt key
 
-![b742f8593fc18.png](https://s1.locimg.com/2023/07/24/b742f8593fc18.png)
+<img width="939" alt="image" src="https://github.com/WtecHtec/gpt-code-name/assets/42227405/ab3dbe5b-bee4-4fb4-a339-97a77902104d">
+
 
 # 开始使用
 
