@@ -3,9 +3,9 @@
   "displayName": "Code Naming Conventions",
   "description": "According to the description, generate variable names and function names according to the Hungarian nomenclature, camel case nomenclature, Pascal nomenclature and underscore nomenclature.",
   "version": "0.0.2",
-  "publisher": "sr7",
+  "publisher": "Herzshen",
   "repository": "https://github.com/WtecHtec/gpt-code-name",
-  "icon": "/images/icon.png",
+  "icon": "images/icon.png",
   "engines": {
     "vscode": "^1.34.0"
   },
